@@ -245,6 +245,7 @@ def read_data_sets(data_path, s2s, n_steps,
     # Normalize the data
     print("normalize to (0-1)")
     data, _ = normalize_columns(data)
+
     ntest = int(round(len(data) * (1.0 - test_size)))
     nval = int(round(len(data[:ntest]) * (1.0 - val_size)))
 

@@ -1,0 +1,5 @@
+hidden_size:4
+learning_rate:0.001
+train_error:0.27250457
+valid_error:0.26966596
+test_error:0.27250457
