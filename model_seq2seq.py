@@ -5,6 +5,7 @@ import tensorflow as tf
 from tensorflow.contrib import rnn
 from trnn1 import *
 from trnn2 import *
+from MERArnn import *
 from trnn_imply import *
 
 

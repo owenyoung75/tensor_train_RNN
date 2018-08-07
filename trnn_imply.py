@@ -124,8 +124,8 @@ def tensor_rnn_with_feed_prev(cell,
                 initial_states.append(initial_state)
         states_list = initial_states #list of high order states
 
-        for time_step in range(num_steps):
-#        for time_step in range(1):
+#        for time_step in range(num_steps):
+        for time_step in range(1):
             if time_step > 0:
                 tf.get_variable_scope().reuse_variables()
 

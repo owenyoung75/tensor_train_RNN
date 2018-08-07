@@ -5,39 +5,39 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import matplotlib.pyplot as plt
+import seaborn as sns
 import numpy as np
 from six.moves import xrange  # pylint: disable=redefined-builtin
 
-from tensorflow.contrib.learn.python.learn.datasets import base
-from tensorflow.python.framework import random_seed
-
 import tensorflow as tf
 from tensorflow.contrib import rnn
+from tensorflow.python.framework import random_seed
+from tensorflow.contrib.learn.python.learn.datasets import base
+
 from reader import read_data_sets
+from train_config2 import *
 from model_seq2seq import *
 from trnn import *
-import numpy
-from train_config import *
+from MERArnn import *
 
-import matplotlib.pyplot as plt
-import seaborn as sns
 
 
 
 flags = tf.flags
 
 flags.DEFINE_string('f', '', 'kernel2')
-flags.DEFINE_string("model", "SymmetricTLSTM", "Model used for learning.")
+flags.DEFINE_string("model", "SymmetricTTRNN", "Model used for learning.")
 flags.DEFINE_string("data_path", "./data.npy", "Data input directory.")
 flags.DEFINE_integer("inp_steps", 3, "burn in steps")
 flags.DEFINE_integer("out_steps", 5, "test steps")
-flags.DEFINE_integer("hidden_size", 4, "hidden layer size")
+flags.DEFINE_integer("hidden_size", 1, "hidden layer size")
 flags.DEFINE_float("learning_rate", 1e-3, "learning rate")
 flags.DEFINE_float("decay_rate", 0.8, "decay rate")
 flags.DEFINE_integer("virtual_dim", 2, "dimension of virtual legs")
-flags.DEFINE_integer("num_orders", 5, "order of polynomials")
+flags.DEFINE_integer("num_orders", 2, "order of polynomials")
 flags.DEFINE_integer("num_lags", 2, "time-lag length")
-flags.DEFINE_integer("num_layers", 1, "time-lag length")
+flags.DEFINE_integer("num_layers", 2, "time-lag length")
 flags.DEFINE_integer("batch_size", 10, "batch size")
 
 FLAGS = flags.FLAGS

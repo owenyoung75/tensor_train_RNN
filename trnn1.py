@@ -45,7 +45,7 @@ class MPS_RNNCell(RNNCell):
     
     def __call__(self, inputs, states):
         """this method is inheritated, and always calculate layer by layer"""
-        output = MPS_einsum(inputs,
+        output = MPS_wavefn(inputs,
                             states,
                             self.output_size,
                             self._rank_vals,
@@ -104,7 +104,7 @@ class MPS_LSTMCell(RNNCell):
                 hs += (h,)
         
         meta_variable_size = 4 * self.output_size
-        concat = MPS_einsum(inputs,
+        concat = MPS_wavefn(inputs,
                             hs,
                             meta_variable_size,
                             self._rank_vals,
@@ -167,7 +167,7 @@ def MPS_tensor_contraction(states_tensor, MPS_tensors):
     return out_h
 
 
-def MPS_einsum(inputs,
+def MPS_wavefn(inputs,
                states,
                output_size,
                rank_vals,
@@ -196,36 +196,36 @@ def MPS_einsum(inputs,
 
 
     # physical_dim: [(HL+1), (HL+1), ... , (HL+1)]
-    mat_dims = np.ones((num_orders,)) * total_state_size
+    physical_dim = np.ones((num_orders,)) * total_state_size
     # virtual_dim * output_dim
-    mat_ranks = np.concatenate(([1],
-                                rank_vals,
-                                [output_size]
-                                ))
+    virtual_dim = np.concatenate(([1],
+                                  rank_vals,
+                                  [output_size]
+                                  ))
 
     # Each factor A is a 3-tensor, with dimensions:
     # [mat_rank[i-1], hidden_size, mat_rank[i] ]
     # total-dim of A is ( mat_rank[i-1] * hidden_size * mat_rank[i] )
     mat_ps = np.cumsum(np.concatenate(([0],
-                                       mat_ranks[:-1] * mat_dims * mat_ranks[1:]
+                                       virtual_dim[:-1] * physical_dim * virtual_dim[1:]
                                        )),
                        dtype=np.int32)
     # totoal number of approximating parameters
     mat_size = mat_ps[-1]  # = (P-1) * (HL+1) * R^2
                            #     + 1 * (HL+1) * R*out_hidden_size
     """ construct a big serialized variable for all MPS parameters """
-    mat = vs.get_variable("weights_h",
+    tsr = vs.get_variable("weights_h",
                           mat_size,
                           trainable = True) # h_z x h_z... x output_size
     MPS = []
     for i in range(num_orders):
         # Fetch the weights of factor A^i from serialized variable weights_h.
-        mat_A = tf.slice(mat,
+        mat_A = tf.slice(tsr,
                          [mat_ps[i]],
                          [mat_ps[i + 1] - mat_ps[i]])
-        mat_A = tf.reshape(mat_A, [mat_ranks[i],
+        mat_A = tf.reshape(mat_A, [virtual_dim[i],
                                    total_state_size,
-                                   mat_ranks[i + 1]])
+                                   virtual_dim[i + 1]])
         MPS.append(mat_A)
 
     weights_x = vs.get_variable("weights_x",

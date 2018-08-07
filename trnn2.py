@@ -47,14 +47,13 @@ class SymmetricMPS_RNNCell(RNNCell):
     
     def __call__(self, inputs, states):
         """this method is inheritated, and always calculate layer by layer"""
-        output = Symmetric_MPS_einsum(inputs,
-                                      states,
-                                      self.output_size,
-                                      self._num_orders,
-                                      self._virtual_dim,
-                                      True)
-#        new_h = self._activation(output)
-        new_h = output
+        new_h = Symmetric_MPS_wavefn(inputs,
+                                     states,
+                                     self.output_size,
+                                     self._num_orders,
+                                     self._virtual_dim,
+                                     True)
+        new_h = self._activation(new_h)
         return  new_h, new_h
 
 
@@ -110,7 +109,7 @@ class SymmetricMPS_LSTMCell(RNNCell):
                 hs += (h,)
         
         meta_variable_size = 4 * self.output_size
-        concat = Symmetric_MPS_einsum(inputs,
+        concat = Symmetric_MPS_wavefn(inputs,
                                       hs,
                                       meta_variable_size,
                                       self._num_orders,
@@ -129,6 +128,7 @@ class SymmetricMPS_LSTMCell(RNNCell):
         else:
             new_state = array_ops.concat([new_c, new_h], 1)
         return new_h, new_state
+
 
 
 
@@ -194,7 +194,7 @@ def periodic_MPS_contraction(states_tensor, MPS_tensors):
 
 
 
-def Symmetric_MPS_einsum(inputs,
+def Symmetric_MPS_wavefn(inputs,
                          states,
                          output_size,
                          num_orders,
@@ -219,6 +219,16 @@ def Symmetric_MPS_einsum(inputs,
         states_tensor = _outer_product(batch_size,
                                        states_tensor,
                                        states_vector)
+    
+    print(states_tensor.shape)
+    large_Tn = []
+    for order in range(num_orders):
+        large_Tn.append(states_vector)
+    large_Tn = tf.transpose(tf.convert_to_tensor(large_Tn), perm=[1,0,2])
+    print(large_Tn.shape)
+    filter_ = tf.get_variable("conv_filter",shape=[2, 3, 1], trainable=False)
+    convolved = tf.nn.conv1d(large_Tn, filters=filter_, stride=2, padding="VALID")
+    print(convolved.shape)
 
     
     """ construct a big serialized variable for all MPS parameters """

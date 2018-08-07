@@ -15,9 +15,9 @@ import tensorflow as tf
 from tensorflow.contrib import rnn
 from reader import read_data_sets
 from model_seq2seq import *
-from trnn import *
+from trnn1 import *
 import numpy
-from train_config import *
+from train_config1 import *
 
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -27,7 +27,7 @@ import seaborn as sns
 flags = tf.flags
 
 flags.DEFINE_string('f', '', 'kernel2')
-flags.DEFINE_string("model", "TTRNN", "Model used for learning.")
+flags.DEFINE_string("model", "LSTM", "Model used for learning.")
 flags.DEFINE_string("data_path", "./data.npy", "Data input directory.")
 flags.DEFINE_integer("inp_steps", 3, "burn in steps")
 flags.DEFINE_integer("out_steps", 5, "test steps")
